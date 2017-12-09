@@ -33,7 +33,7 @@ public class User {
 }
 ```
 
-Implement **TemplateDataSource** for providing sql connections  JDBC Data Source (You can use pooling as well , see **com.codeway.daoTemplate.sample.PooledDataSource **)
+Implement **TemplateDataSource** for providing sql connections  JDBC Data Source (You can use pooling as well , see **com.codeway.daoTemplate.sample.PooledDataSource** )
 
 ```
 public class MyDataSource  implements TemplateDataSource{
