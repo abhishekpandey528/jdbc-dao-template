@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.codeway.daoTemplate.model;
+package com.codeway.daoTemplate.sample;
 
 import java.sql.Timestamp;
 

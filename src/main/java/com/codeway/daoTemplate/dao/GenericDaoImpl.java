@@ -1,4 +1,4 @@
-package com.codeway.daoTemplate.dao.impl;
+package com.codeway.daoTemplate.dao;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
@@ -24,23 +24,40 @@ import com.codeway.daoTemplate.utils.TemplateDataSource;
 import com.codeway.daoTemplate.utils.TemplateLogger;
 
 /**
+* Template Class for Generic Dao Pattern implementation 
 *
 * @author Abhishek Pandey
-* 
-* Generic Dao Pattern implementation 
+*          <br>
+*         Copyright (c) Abhishek Pandey
+*         <br><br>
+*         Licensed under the Apache License, Version 2.0 (the "License");
+*         you may not use this file except in compliance with the License.
+*         You may obtain a copy of the License at
+*         <br><br>
+*         http://www.apache.org/licenses/LICENSE-2.0
+*         <br><br>
+*         Unless required by applicable law or agreed to in writing, software
+*         distributed under the License is distributed on an "AS IS" BASIS,
+*         WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+*         See the License for the specific language governing permissions and
+*         limitations under the License.
 */
 public abstract class GenericDaoImpl<Pk extends Serializable, Entity>{
 
 //	Logger logger = Logger.getLogger(this.getClass());
 	
+	TemplateDataSource dataSource;
 	Class<Entity> type;
 	String tableName;
 	String pkColumn;
 	
 	Map<String, Field> columnMap;
 	
-	public GenericDaoImpl(Class<Entity> type) {
+	public GenericDaoImpl(Class<Entity> type, TemplateDataSource dataSource) {
+		
 		this.type = type;
+		this.dataSource = dataSource;
+		
 		if(type.isAnnotationPresent(Table.class)){
 			tableName = type.getAnnotation(Table.class).name();
 		}
@@ -67,7 +84,7 @@ public abstract class GenericDaoImpl<Pk extends Serializable, Entity>{
 		if(pkColumn ==null)
 			throw new Exception("Entity does\'t have @Id attribute");
 		
-		Connection con = TemplateDataSource.getConnection();
+		Connection con = dataSource.getConnection();
 		
 		PreparedStatement psmt = con.prepareStatement("select * from "+tableName+" where "+pkColumn+" =?");
 		psmt.setObject(1, id);
@@ -106,7 +123,7 @@ public abstract class GenericDaoImpl<Pk extends Serializable, Entity>{
 		
 		if(query ==null || query.isEmpty() || values ==null) return new ArrayList<>();
 
-		Connection con = TemplateDataSource.getConnection();
+		Connection con = dataSource.getConnection();
 		
 		TemplateLogger.info("query : "+query);
 		PreparedStatement psmt = con.prepareStatement(query);
@@ -123,7 +140,7 @@ public abstract class GenericDaoImpl<Pk extends Serializable, Entity>{
 	
 	public Entity save(Entity entity) throws Exception
 	{
-		Connection conn = TemplateDataSource.getConnection();
+		Connection conn = dataSource.getConnection();
 		
 		StringBuffer query =new StringBuffer("insert into "+tableName+" (");
 		StringBuffer params = new StringBuffer(" values(");
@@ -166,7 +183,7 @@ public abstract class GenericDaoImpl<Pk extends Serializable, Entity>{
 	        }
 		}
 		
-		TemplateDataSource.closeConnection(conn);
+		dataSource.closeConnection(conn);
 		return entity;
 	}
 
@@ -180,7 +197,7 @@ public abstract class GenericDaoImpl<Pk extends Serializable, Entity>{
 	
 	public Entity update(Entity entity, String whereCondition, Object... values) throws Exception
 	{
-		Connection conn = TemplateDataSource.getConnection();
+		Connection conn = dataSource.getConnection();
 		
 		StringBuffer query =new StringBuffer("update "+tableName +" set ");
 		
@@ -203,7 +220,7 @@ public abstract class GenericDaoImpl<Pk extends Serializable, Entity>{
 		}
 		
 		psmt.executeUpdate();
-		TemplateDataSource.closeConnection(conn);
+		dataSource.closeConnection(conn);
 		return entity;
 	}
 
@@ -218,7 +235,7 @@ public abstract class GenericDaoImpl<Pk extends Serializable, Entity>{
 		if(values ==null || values.length ==0 || whereCondition==null || whereCondition.isEmpty()) 
 			return;
 		
-		Connection conn = TemplateDataSource.getConnection();
+		Connection conn = dataSource.getConnection();
 		
 		String query ="delete from "+tableName+" where "+whereCondition;
 		PreparedStatement psmt = conn.prepareStatement(query);
@@ -227,7 +244,7 @@ public abstract class GenericDaoImpl<Pk extends Serializable, Entity>{
 			psmt.setObject(i+1, values[i]);
 		}
 		psmt.executeUpdate();
-		TemplateDataSource.closeConnection(conn);
+		dataSource.closeConnection(conn);
 	}
 	
 	
